@@ -1,0 +1,124 @@
+/*
+ * Universidade Federal do Rio de Janeiro
+ * Escola Politecnica
+ * Departamento de Eletronica e de Computacao
+ * Prof. Marcelo Luiz Drumond Lanza
+ * EEL 270 - Computacao II - Turma 2015/2
+ * Autor: Felipe Campos De Leo
+ *
+ * $Author$
+ * $Date$
+ * $Log$
+ */
+
+#define		_XOPEN_SOURCE	500
+#include	<stdio.h>
+#include	<stdlib.h>
+#include	<unistd.h>
+#include	<getopt.h>
+#include  <string.h>
+#include  <sys/types.h>
+/* Adicionar Biblioteca Ncurses */
+
+#include   "tarFunctions.h"
+#include   "tarTypes.h"
+#include   "tarConst.h"
+#include   "tarConfig.h"
+#include   "tarErrors.h"
+#include   "tarUserInterfaces.h"
+
+/* This file should implement all the CLI Code including the opt long and Ncurses */
+
+/* Verify the correct names for the variables in english */
+typedef enum
+{
+  tarEmailArgument,
+  tarLanguageArgument,
+  tarNicknameArgument,
+  tarUsernameArgument,
+} tarArgumentsIndex;
+
+tarErrorType
+main (int tarArgc, char **tarArgv)
+{
+ const char *tarShortOptions = "ChN";
+ struct option tarLongOptions [4] =
+ {
+   {"Configure", 0, NULL, 'C'},
+   {"help", 0, NULL, 'h'},
+   {"Ncurses", 0, NULL, 'N'},
+   {NULL, 0, NULL, 0}
+ };
+
+char *tarArgumentNames [ ] =
+ {
+   "email",
+   "language",
+   "nickname",
+   "username",
+   NULL
+ };
+
+ int tarShortOption ;
+ int tarLongOption ;
+ int tarArgumentIndex ;
+ int tarOptionIndex ;
+ char *tarArguments, *tarArgumentValue;
+
+ opterr = 0; /* desabilita exibicao de erro */
+
+ while ((tarShortOption =
+   /* Utilizacao da funcao getopt_long */
+           getopt_long (tarArgc,
+                        tarArgv,
+                        tarShortOptions,
+                        tarLongOptions,
+                        &tarLongOption)) != -1)
+ {
+    switch (tarShortOption)
+    {
+      case 'C':
+        printf ("Configure\n");
+        while (tarOptionIndex < tarArgc)
+        {
+          tarArguments = tarArgv [tarOptionIndex];
+          tarArgumentIndex =
+          /* Utilizacao da funcao getsubopt */
+            getsubopt (&tarArguments, tarArgumentNames, &tarArgumentValue);
+          switch (tarArgumentIndex)
+          {
+            case tarEmailArgument:
+              printf ("Email: \"%s\"\n", tarArgumentValue);
+            break;
+            case tarLanguageArgument:
+             printf ("Idioma: \"%s\"\n", tarArgumentValue);
+            break;
+
+            case tarUsernameArgument:
+              printf ("Nome: \"%s\"\n", tarArgumentValue);
+            break;
+
+            case tarUsernameArgument:
+              printf ("Nome: \"%s\"\n", tarArgumentValue);
+            break;
+
+            default:
+              printf ("Opcao invalida\n");
+          }
+          tarOptionIndex++;
+        }
+      break;
+
+      case 'h':
+      break;
+
+      case 'N':
+      break;
+
+    } /* switch tarArgumentIndex*/
+  } /* while tarShortOption */
+
+  return (tarOk) ;
+}
+
+/* $RCSfile$ */

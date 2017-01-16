@@ -1,0 +1,588 @@
+/*
+ * Universidade Federal do Rio de Janeiro
+ * Escola Politecnica
+ * Departamento de Eletronica e de Computacao
+ * Prof. Marcelo Luiz Drumond Lanza
+ * EEL 270 - Computacao II - Turma 2015/2
+ * Autor: Felipe Campos De Leo
+ *
+ * $Author$
+ * $Date$
+ * $Log$
+ */
+#define _XOPEN_SOURCE     500
+#include    <unistd.h>
+#include    <stdio.h>
+#include    <stdlib.h>
+#include    <time.h>
+#include    <string.h>
+
+
+#include  "tarFunctions.h"
+#include  "tarTypes.h"
+#include  "tarConst.h"
+
+/* This file should implement all the auxiliary functions of the TAR System */
+
+/* Functions */
+
+/* tarErrorType tarFunction ( type tarVariable1 , type tarVariable2 )
+ * {
+ *   Implementation
+ * }
+ */
+
+/*
+ * int TarGetLanguageIndex ( char *tarLanguageString , int tarLanguageIndex ) ;
+ *
+ * Arguments:
+ * char *tarLanguageString - Language Desired (I)
+ * int tarLanguageIndex- Language Index Returned (O)
+ *
+ * Returned code:
+ * tarOK - the function have been executed successfully
+ * tarInvalidLanguage - The language you are trying to get the Index is not valid
+ *
+ * Description:
+ * This function gets a string with the Language selection in english and returns an integer value corresponding to this language on the type tarLanguageType
+ */
+
+int TarGetLanguageIndex ( char *tarLanguageString )
+{
+  tarLanguageType tarLanguageVerification ;
+
+  if ((strcmp("portuguese", tarLanguageString)))
+    tarLanguageVerification = tarPortuguese ;
+  else
+    tarLanguageVerification = tarEnglish ;
+
+return tarLanguageVerification;
+
+}
+// For any other cases it will return the default Language
+
+/*
+ * char *TarGetAbsoluteFileName ( char *string1 , char *string2 )
+ *
+ * Arguments:
+ * char *tarLanguageString
+ * int tarLanguageIndex-
+ *
+ * Returned code:
+ *
+ *
+ *
+ * Description:
+ *
+ */
+
+char *TarGetAbsoluteFileName ( char *tarFileName , char *tarDirectoryPath )
+{
+  char *tarAbsolutFileName ;
+  snprintf ( tarAbsolutFileName , TAR_MAX_ABSOLUT_FILENAME_SIZE , "%s%s" , tarDirectoryPath , tarFilename ) ;
+
+  return tarAbsolutFileName ;
+}
+
+/*
+ * tarErrorType
+ * TarCheckStringField (char *string1 , char *string2 , size_t size1 , size_t size2 )
+ *
+ * Arguments:
+ * char *tarLanguageString
+ * int tarLanguageIndex-
+ *
+ * Returned code:
+ *
+ *
+ *
+ * Description:
+ *
+ */
+
+tarErrorType
+tarCheckStringField (char *tarString , char *tarValidChars , size_t tarMinStringLength , size_t tarMaxStringLength )
+{
+  int tarIndex1 , tarIndex2 ;
+  size_t  tarTest = 0 ;
+
+  if (!tarString)
+    return tarInvalidArgument;
+
+  if ( strlen ( tarString ) < tarMinStringLength || strlen ( tarString ) > tarMaxStringLength )
+    return tarInvalidLength ;
+
+  for ( tarIndex1 = 0 ; tarIndex1 < strlen ( tarString ) ; tarIndex1++ )
+    for (tarIndex2 = 0 ; tarIndex2 < strlen ( tarValidChars ) ; tarIndex2++ )
+      if ( tarString[tarIndex1] == tarValidChars[tarIndex2] )
+        tarTest++ ;
+
+  if ( tarTest != strlen ( tarString ) )
+    return tarInvalidChar ;
+
+return tarOk;
+}
+
+/*
+ * tarErrorType
+ * TarCheckNickname (char *tarNickname , char *tarValidChars , size_t tarMinStringLength , size_t tarMaxStringLength )
+ *
+ * Arguments:
+ * char *tarLanguageString
+ * int tarLanguageIndex-
+ *
+ * Returned code:
+ *
+ *
+ *
+ * Description:
+ *
+ */
+
+tarErrorType
+TarCheckNickname (char *tarNickname , char *tarValidChars , size_t tarMinStringLength , size_t tarMaxStringLength )
+{
+  int tarIndex, tarDotTest = 0 ;
+
+  if ( !tarCheckStringField ( tarNickname, tarValidChars, tarMinStringLength, tarMaxStringLength))
+    return tarCheckStringField(tarNickname, tarValidChars, tarMinStringLength, tarMaxStringLength);
+
+  for ( tarIndex = 0 ; tarIndex < strlen ( tarNickname ) ; tarIndex++ )
+    if ( tarNickname[tarIndex] == '.' )
+      tarDotTest++ ;
+
+  if (tarDotTest!=1)
+    return tarInvalidDotNumber;
+
+  return tarOk;
+}
+
+/*
+ * tarErrorType
+ * TarCheckEmail (char *tarEmail, char *tarValidChars, size_t tarMinStringLength, size_t tarMaxStringLength)
+ *
+ * Arguments:
+ * char *tarLanguageString
+ * int tarLanguageIndex-
+ *
+ * Returned code:
+ *
+ *
+ *
+ * Description:
+ *
+ */
+
+tarErrorType
+TarCheckEmail (char *tarEmail, char *tarValidChars, size_t tarMinStringLength, size_t tarMaxStringLength)
+{
+  int tarIndex, tarAtTest = 0 ;
+
+  if ( !tarCheckStringField ( tarEmail , tarValidChars , tarMinStringLength , tarMaxStringLength ) )
+    return tarCheckStringField ( tarEmail , tarValidChars , tarMinStringLength , tarMaxStringLength ) ;
+
+  for ( tarIndex = 0 ; tarIndex < strlen ( tarEmail ) ; tarIndex++)
+      if ( tarEmail[tarIndex] == '@' )
+        tarAtTest++ ;
+
+  if ( tarAtTest != 1 )
+    return tarInvalidAtNumber;
+
+  return tarOk;
+}
+
+/*
+ * tarErrorType
+ * TarCreateRandomString (char *tarValidChars, size_t tarStringLength, char *tarRandomString)
+ *
+ * Arguments:
+ * char *tarValidChars - Valid Characters for the String Creation (I)
+ * size_t tarStringLength - The length - in number of characters - of the desired string (I)
+ * char *tarRandomString - The string generated by the function (O)
+ *
+ * Returned code:
+ * tarOk - String generated successfully
+ *
+ *
+ * Description:
+ * This functions generates a random string based on the Input Length and the Input of Valid Characters for it.
+ */
+
+
+tarErrorType
+TarCreateRandomString (char *tarValidChars, size_t tarStringLength, char *tarRandomString)
+{
+  unsigned short tarIndex;
+
+  srand ( ( unsigned int ) time ( NULL ) ) ;
+
+  for (tarIndex = 0 ; tarIndex < tarStringLength ; tarIndex++ )
+    tarRandomString[tarIndex] = tarValidChars[rand () % strlen (tarValidChars)] ;
+  tarRandomString[tarIndex + 1] = '\0' ;
+
+  return tarOk;
+}
+
+/*
+ * tarErrorType
+ * TarCreateNickname (char *tarFullname, char *tarNickname1, char *tarNickname2)
+ *
+ * Arguments:
+ * char *tarLanguageString
+ * int tarLanguageIndex-
+ *
+ * Returned code:
+ *
+ *
+ *
+ * Description:
+ *
+ */
+
+tarErrorType
+TarCreateNickname (char *tarFullname, char *tarNickname1, char *tarNickname2)
+{
+
+  char *tarAuxName , *tarFirstName , *tarMiddleName , *tarLastName ;
+  int tarIndex1 , tarIndex2 = 0 , tarIndex3 = 0 ;
+  /* Index1 = Index to walk through the FullName characters
+   * Index2 = Index of the AuxName Character Position
+   * Index3 = Index of Spaces Count while walking through the Full Name
+  */
+
+  /* Beginning of Full Name Analysis */
+  for ( tarIndex1 = 0 ; tarIndex1 < strlen (tarFullname) ; tarIndex1++ )
+    {
+      if ( tarFullname[tarIndex1] == ' ' )
+        {
+          tarAuxName[tarIndex2+1] = '\0' ;
+          /* Some modificications up here */
+          if ( tarIndex3 == 0 )
+            strcpy ( tarFirstName , tarAuxName ) ;
+          else if ( tarIndex3 == 1 )
+            strcpy ( tarLastName , tarAuxName ) ;
+          else
+              {
+                strcpy ( tarMiddleName , tarLastName ) ;
+                strcpy ( tarLastName , tarAuxName ) ;
+              }
+          tarIndex2 = 0 ;
+          tarIndex3++ ;
+        }
+      else
+        tarAuxName[tarIndex2]=tarFullname[tarIndex1];
+    }
+  /* --- End of Full Name Analysis --- */
+
+  /* Generating Nickname options based on the Full Name analysis */
+  if (tarFirstName==NULL || tarLastName==NULL)
+   return tarInvalidFullname;
+
+  /* Nickname2 Generation */
+  if (tarMiddleName==NULL)
+   tarNickname2==NULL;
+  else
+   sprintf(tarNickname2, "%s.%s", tarFirstName,tarMiddleName);
+
+  /* Nickname1 Generation */
+  sprintf(tarNickname1, "%s.%s", tarFirstName,tarLastName);
+
+  return tarOk;
+}
+
+/*
+ * tarErrorType
+ * TarGetCryptAlgorithm (char *tarEncryptedPassword, tarCryptAlgorithms *tarUsedAlgorithm)
+ *
+ * Arguments:
+ * char *tarEncryptedPassword - Encrypted Password (I)
+ * tarCryptAlgorithms *tarUsedAlgorithm - Algorithm used for encryption of the Input Password (O)
+ *
+ * Returned code:
+ * tarOk -
+ *
+ *
+ * Description:
+ * The function receives and encrypted password and returns the corresponding crypt algorithm used to encrypt it.
+ */
+
+/* Encoded => Encrypted */
+
+tarErrorType
+TarGetCryptAlgorithm (char *tarEncryptedPassword, tarCryptAlgorithms *tarUsedAlgorithm)
+{
+   const char tarCharIdValidator = '$' ;
+   char *tarStringIterator ;
+
+/* Caso dê erro aqui, devo colocar a variável como const char em um "const char" intermediario */
+   tarStringIterator = strchr(tarEncryptedPassword, tarCharIdValidator);
+/* Verification of a NULL return value == no ID Char in the Password */
+   if (!tarStringIterator)
+   {
+    printf("O algoritmo utilizado eh DES");
+    return ( tarDes ) ;
+   }
+
+/* Verification of Crypt algorithm by ID used */
+   switch (tarStringIterator[1])
+   {
+       case '1':
+        /* Remover printf após testes */
+        printf("O algoritmo utilizado eh MD5\n");
+        /* Verificar em execucao se é recebido o algoritmo mesmo => Utilizar printf para testes */
+        tarUsedAlgorithm = tarMd5 ;
+        return ( tarOk ) ;
+       break ;
+
+       case '5':
+        printf("O algoritmo utilizado eh SHA-256\n");
+        tarUsedAlgorithm = tarSha256 ;
+        return ( tarOk ) ;
+       break ;
+
+       case '6':
+        printf("O algoritmo utilizado eh SHA-512\n");
+        tarUsedAlgorithm = tarSha512 ;
+        return ( tarOk ) ;
+       break ;
+
+       default:
+              printf ("Algoritmo nao identificado\n");
+              return ( tarUnknownAlgorithm ) ;
+   }
+}
+
+/*
+ * tarErrorType
+ * TarEncodePasswordWithSpecificAlgorithm (char *tarPlainPassword , tarCryptAlgorithms *tarCryptAlgorithm , char *tarEncryptedPassword)
+ *
+ * Arguments:
+ * char *tarPlainPassword - Plain password, not yet encrypted (I)
+ * tarCryptAlgorithms tarCryptAlgorithm - Chosen Crypt Algorithm to Crypt (I)
+ * char *tarEncryptedPassword - Password Encrypted with the Plain Pasword and de chosen Crypt Algorithm (O)
+ *
+ * Returned code:
+ * tarOk - The Plain Password has been encrypted successfully
+ * tarUnknownAlgorithm - The Crypt Algorithm requested was not recognized by the system
+ * tarCryptPasswordError - There has been an error while crypting the algorithm
+ *
+ * Description:
+ * The function encrypts a Plain Pasword with a chosen Crypt Algorithm with a Random generated Salt
+ */
+
+tarErrorType
+TarEncodePasswordWithSpecificAlgorithm (char *tarPlainPassword , tarCryptAlgorithms *tarCryptAlgorithm , char *tarEncryptedPassword)
+{
+    char *tarRandomString ;
+    char *tarSalt;
+
+    if (TarCreateRandomString ( TAR_SALT_VALID_CHARACTERS , TAR_SALT_SHA512_LENGTH , tarRandomString ) != 0)
+      return tarStringGenerationError ;
+
+    switch (tarCryptAlgorithm)
+    {
+      /* DES */
+      case 0:
+        strcpy(tarSalt, TAR_SALT_DES);
+        strncat(tarSalt, tarRandomString , TAR_SALT_DES_LENGTH);
+      break ;
+      /* MD5 */
+      case 1:
+        strcpy(tarSalt, TAR_SALT_MD5);
+        strncat(tarSalt, tarRandomString , TAR_SALT_MD5_LENGTH);
+      break ;
+      /* SHA-256 */
+      case 2:
+        strcpy(tarSalt, TAR_SALT_SHA256);
+        strncat(tarSalt, tarRandomString , TAR_SALT_SHA256_LENGTH);
+      break ;
+      /* SHA-512 */
+      case 3:
+        strcpy(tarSalt, TAR_SALT_SHA512);
+        strncat(tarSalt, tarRandomString , TAR_SALT_SHA512_LENGTH);
+      break ;
+
+      default:
+        return tarUnknownAlgorithm ;
+      break ;
+    }
+
+    tarSalt[strlen(tarSalt) + 1] = '\0' ;
+
+    tarEncryptedPassword = crypt( tarPlainPassword , tarSalt) ;
+
+    if (!tarEncryptedPassword)
+      return tarCryptPasswordError ;
+
+    /* Tirar prints após testes de DEBUG */
+    printf("O Plain Password é: %s \n" , tarPlainPassword );
+    printf("O Salt é: %s \n" , tarSalt );
+    printf("O Password Criptografado é: %s \n" , tarEncryptedPassword );
+
+    return tarOk ;
+}
+
+/*
+ * tarErrorType
+ * TarEncodePasswordWithSpecificSalt (char *tarPlainPassword , char *tarCompleteSalt , char *tarEncryptedPassword )
+ *
+ * Arguments:
+ * char *tarPlainPassword - Plain password, not yet encrypted (I)
+ * char *tarCompleteSalt - Specific Salt for Encryption - with Algorithm ID included (I)
+ * char *tarEncryptedPassword - Password Encrypted with the Plain Pasword and the chosen Salt (O)
+ *
+ * Returned code:
+ * tarOk - The Plain Password has been encrypted successfully
+ * tarCryptPasswordError - There has been an error while crypting the algorithm
+ *
+ * Description:
+ * The function encrypts a Plain Pasword with a chosen Salt
+ */
+
+tarErrorType
+TarEncodePasswordWithSpecificSalt (char *tarPlainPassword , char *tarCompleteSalt , char *tarEncryptedPassword )
+{
+  /* Validar se o Salt é valido
+  Se possuir $, deve ter ID = 1, 5 ou 6
+  Caso contrario irá realizar DES com os 2 primeiros
+   */
+  if (!tarEncryptedPassword = crypt (tarPlainPassword , tarCompleteSalt)
+    return tarCryptPasswordError ;
+
+  return tarOk ;
+}
+
+/*
+ * tarErrorType
+ * TarCheckPassword (char *tarPlainPassword , char *tarEncryptedPassword)
+ *
+ * Arguments:
+ * char *tarPlainPassword - Plain password (I)
+ * char *tarEncryptedPassword - Encrypted Password (I)
+ *
+ * Returned code:
+ * tarOk - The Plain Password has been encrypted successfully
+ * tarInvalidPassword - The PlainPassword does not match with the corresponding PlainPassword in the Encrypted Password
+ *
+ * Description:
+ * The function verifies if the PlainPassword corresponds to the Encrypted Password
+ */
+
+tarErrorType
+TarCheckPassword (char *tarPlainPassword , char *tarEncryptedPassword)
+{
+  char *tarSalt ;
+  char *tarAuxString ;
+  char *tarPlainPasswordEncrypted ;
+  unsigned tarSaltLength ;
+  /* If there is no SALT ID, the password is using DES Algorithm */
+  if ( !(tarAuxString = strrchr(tarEncryptedPassword , TAR_SALT_ID) ) )
+    strncat(tarSalt, tarEncryptedPassword , TAR_SALT_DES_LENGTH);
+  /* If there is SALT ID, the password will have the ID and the Salt before the last SALT ID ($) */
+  else
+  {
+    tarSaltLength = ( strlen(tarEncryptedPassword) - strlen(tarAuxString) + 1)
+    strncat( tarSalt, tarEncryptedPassword , tarSaltLength ) ;
+  }
+  /* Encrypt the PlainPasswor with the Salt on the Encrypted Password */
+  TarEncodePasswordWithSpecificSalt ( tarPlainPassword , tarSalt , tarPlainPasswordEncrypted ) ;
+  /* Compares the PlainPassword Encrypted with the Encrypted Password */
+  if ( strcmp(tarPlainPasswordEncrypted, tarEncryptedPassword) != 0)
+    return tarInvalidPassword ;
+
+  return tarOk ;
+}
+
+/*
+ * tarErrorType
+ * TarAuthenticateUser ( tarUserDataType * ) ;
+ *
+ * Arguments:
+ * char *tarUserDataType -
+ *
+ *
+ * Returned code:
+ * tarOk - The User is Valid
+ *
+ *
+ * Description:
+ * This function will receibe a Nickname and a Password, if they are valid it will return the: ID, Full Name, Email, User Profile
+ */
+
+tarErrorType
+TarAuthenticateUser ( tarUserDataType *tarUserToAuthenticate )
+{
+  FILE *tarFile ;
+  /* Definir tamanho maximo da String */
+  char *tarAuxString, *tarNickname ;
+  char tarBufferString[TAR_MAX_USERS_LINE_SIZE] ;
+  unsigned tarNicknameLength ;
+  boolean tarNicknameFound = false ;
+
+  tarNicknameLength = strlen (tarUserToAuthenticate.tarNickname) ;
+  /* Validate those 2 variables */
+  tarUserToAuthenticate.tarPassword
+  /* Abrir arquivo "users" => Procurar o Nickname cadastrado nela (linha por linha) */
+  /* Opening File for Reading and verification of existing users */
+  tarFile = fopen(TAR_USERS_DATA_FILENAME , "r")
+
+  if(!tarFile)
+    return tarOpeningFileError ;
+
+  /* tarBufferString = Buffer para leitura / Ler Linha por Linha? Tamanho maximo Linha? */
+  if( !(fgets( tarBufferString, TAR_MAX_USERS_LINE_SIZE, tarFile)) )
+  {
+    fclose(tarFile);
+    return tarReadingFileError ;
+  }
+
+  /* The function will read the USERS file until the End of File or until it finds the corresponding Nickname */
+  while ( (fgets( tarBufferString, TAR_MAX_USERS_LINE_SIZE, tarFile) != NULL) || (tarNicknameFound == true ) )
+  {
+    /* Validation of the search for the nickname on each line */
+    if ( tarAuxString = strstr(tarBufferString, tarUserToAuthenticate.tarNickname) )
+    {
+      strncat( tarNickname , tarAuxString , tarNicknameLength ) ;
+      tarNicknameFound = true ;
+    }
+
+  }
+
+  if ( tarNicknameFound == false )
+    return tarUserNotFound ;
+    /* Verificar se o Password também está correto
+    Na mesma linha, verificar o Password, e criptografar o password em Plain Text pelo usuario para ver se é o mesmo. (É PlainText??)
+     */
+
+
+  if ( !TarCheckPassword(plainpassword, encryptedpassword) )
+   return tarInvalidPassword ;
+
+/* Copied */
+
+    /*LENDO E CHECANDO NOME MOEDA*/
+
+    /* Liberando memoria depois de fechar o arquivo
+     LiberarMemoria(primeiroAuxiliar);
+     */
+
+  /* Caso nao seja encontrado => ERRO NICKNAME NAO CADASTRADO */
+
+  /* Caso esteja cadastrado, verificar senha
+  Pegar senha inserida pelo usuario => Codificar ela e comparar com a do arquivo
+  Caso não esteja OK => Erro de Senha Invalida */
+
+
+  /* Caso a validação esteja OK => ler atributos do Usuario no arquivo "users" e preencher na variavel:
+  - tarUserID
+  - tarFullName
+  - email
+  - User Profile
+  Return => tarOk
+  */
+  /* Closing the File */
+  fclose(tarFile) ;
+
+}
+
+/* $RCSfile$ */
